@@ -2,9 +2,9 @@ import argparse
 import os
 
 import pandas as pd
+from extractor import Extractor
 from song_crawler import song_crawl
 
-from extractor import Extractor
 from food_youtuber_crawler import playlist_crawl
 
 

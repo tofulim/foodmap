@@ -1,7 +1,6 @@
 import argparse
 
 import requests
-
 from extractor import RuleBaseExtractor
 from pattern_parser import Parser
 
