@@ -1,6 +1,7 @@
 *.ipynb
 build
 crawl.egg-info
+.idea/
 .idea
 
 # Distribution / packaging
