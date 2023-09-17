@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# TODO: 무한 스크롤 큐를 utils로 빼고 클래스화해야함
 # Queue의 기본적인 기능 구현
 class Queue:
     def __init__(self, maxsize):
