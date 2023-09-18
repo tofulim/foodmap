@@ -66,6 +66,23 @@ class Kim3MealsCrawler(AbstractCrawler):
 
         return video_information_list
 
+    def total_crawl(self, target_youtuber_tag: str, save_path: str, **kwargs):
+        """
+        food youtuber's total videos crawler
+
+        get food youtuber's restaurant title and location
+
+        Args:
+            target_youtuber_tag (str): playlist's owner(youtuber tag)
+            save_path (str): final save path
+
+        Returns:
+            video_information (list): consist of dict that has keys(video_id(str), title(str), thunbnail_list(list))
+
+        """
+        # infinite scroll video crawler를 이용해 모든 vids 들을 받는다.
+        self.scraper()
+
 
 if __name__ == "__main__":
     argsparser = argparse.ArgumentParser(description="Crawler Argparse")
@@ -73,6 +90,16 @@ if __name__ == "__main__":
 
     args = argsparser.parse_args()
 
+    # recent crawl
+    # parser = NaverMapParser()
+    # scraper = MoreInfoScraper()
+    # crawler = Kim3MealsCrawler(scraper=scraper, parser=parser)
+    # result = crawler.crawl(args.target_youtuber_tag)
+    # print(f"total result: {result}")
+    # print(f"result[0]: {result[0]}")
+    # print(f"len of result is : {len(result)}")
+
+    # total crawl
     parser = NaverMapParser()
     scraper = MoreInfoScraper()
     crawler = Kim3MealsCrawler(scraper=scraper, parser=parser)
