@@ -2,7 +2,7 @@
 build
 crawl.egg-info
 .idea/
-.idea
+*.idea
 
 # Distribution / packaging
 .Python
