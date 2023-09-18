@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 
+# TODO: total crawler를 주로 사용하도록 하고 행동을 바꿔야함.
 class AbstractCrawler(ABC):
     """
     youtube 영상 내 원하는 정보들을 수집하고 추출하기 위한 추상 클래스
