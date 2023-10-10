@@ -120,8 +120,11 @@ class InfinitScrollVideoCrawler:
         video_info = []
         for video_html in video_htmls:
             # youtube 영상 하나의 고유 vid 추출
-            video_id = video_html.find("a", {"id": "thumbnail"})["href"]
+            video_id = video_html.find("a", {"id": "video-title-link"})["href"]
             video_id = video_id.split("/watch?v=")[-1]
+
+            # 제목 추출
+            title = video_html.find("a", {"id": "video-title-link"})["title"]
 
             # youtube 영상의 메타 데이터 (조회 수, 업로드 시점) 추출
             meta_datas = video_html.find(
@@ -132,13 +135,14 @@ class InfinitScrollVideoCrawler:
             video_info.append(
                 {
                     "video_id": video_id,
+                    "title": title,
                     "num_click": num_click,
                     "uploaded_time": uploaded_time,
                 }
             )
 
         base_videos_info_df = pd.DataFrame(
-            video_info, columns=["video_id", "num_click", "uploaded_time"]
+            video_info, columns=["video_id", "title", "num_click", "uploaded_time"]
         )
         base_videos_info_df.to_csv(save_path, index=False, encoding="utf-8-sig")
         logger.info(f"file saved at {save_path}")
