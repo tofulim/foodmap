@@ -1,7 +1,9 @@
 *.ipynb
 build
 crawl.egg-info
-.idea
+.idea/
+*.idea
+*.iml
 
 # Distribution / packaging
 .Python
@@ -23,3 +25,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+/.idea/
+
+*/__pycache__/
+*.pyc
+__pycache__/
