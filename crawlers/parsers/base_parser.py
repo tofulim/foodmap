@@ -14,13 +14,13 @@ class AbstractParser(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def get_naver_url(
+    def get_naver_url_keys(
         total_page: str,
     ):
         pattern = "https?://naver.me/([a-zA-Z0-9]+?)\\\\n"
-        naver_urls = re.findall(pattern, total_page)
+        naver_url_keys = re.findall(pattern, total_page)
 
-        return naver_urls
+        return list(set(naver_url_keys))
 
     @staticmethod
     def get_match_pattern_string(
@@ -61,17 +61,19 @@ class NaverMapParser(AbstractParser):
     def __init__(self):
         # 더보기란에서 정보를 얻겠다는 것
         self.request_url = "https://www.youtube.com/watch?v={video_id}"
+        self.naver_url_shop_title_pattern = "data-line-title"
+        self.naver_url_shop_location_pattern = "data-line-description"
 
-    # TODO: scraper로 분리해서 thumnail이랑 더보기란이나 댓글을 key:value로 구분해서 key: html_Source로 하게 해야함
     def parse(self, video_id: str, **kwargs):
         """
-        개별 url의 영상을 분석해
+        개별 url의 영상을 분석해 thumbnail, store names, store address를 반환한다.
 
         Args:
-            video_id ():
+            video_id (str): youtube vid
             **kwargs ():
 
         Returns:
+            naver_map_result (dict | List(dict)): 복수 혹은 단수의 가게 정보
 
         """
 
@@ -79,21 +81,28 @@ class NaverMapParser(AbstractParser):
             url=self.request_url.format(video_id=video_id), verify=False
         )
         html_source = response.text
-        naver_urls = self.get_naver_url(
+        naver_url_keys = self.get_naver_url_keys(
             total_page=html_source,
         )
-        # TODO: url이 복수일 수 있음. 상점 또한 복수. db schema 정의 필요
-        naver_map_source = requests.get(naver_urls, verify=False)
-        # ISO-8859-1 인코딩 문제로 한글 깨지는 문제 해결
-        naver_map_source.encoding = "utf-8"
-        naver_map_source = naver_map_source.text
-        store_info = self.get_store_info(naver_map_source=naver_map_source)
 
-        return {
-            "video_id": video_id[0],
-            "naver_urls": naver_urls,
-            **store_info,
-        }
+        naver_map_results = []
+        for naver_url_key in naver_url_keys:
+            url = f"https://naver.me/{naver_url_key}"
+            naver_map_source = requests.get(url, verify=False)
+            # ISO-8859-1 인코딩 문제로 한글 깨지는 문제 해결
+            naver_map_source.encoding = "utf-8"
+            naver_map_source = naver_map_source.text
+            store_info = self.get_store_info(naver_map_source=naver_map_source)
+
+            naver_map_results.append(
+                {
+                    "video_id": video_id,
+                    "naver_url_key": naver_url_key,
+                    **store_info,
+                }
+            )
+
+        return naver_map_results
 
     def get_store_info(self, naver_map_source: str):
         pattern = '{target}="([^"]+)"'
@@ -109,3 +118,10 @@ class NaverMapParser(AbstractParser):
             "shop_name": name,
             "shop_location": location,
         }
+
+
+if __name__ == "__main__":
+    nmp = NaverMapParser()
+    vid = "LvfBEJipU6o"
+    res = nmp.parse(video_id=vid)
+    print(res)
