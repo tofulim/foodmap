@@ -92,7 +92,13 @@ class NaverMapParser(AbstractParser):
             # ISO-8859-1 인코딩 문제로 한글 깨지는 문제 해결
             naver_map_source.encoding = "utf-8"
             naver_map_source = naver_map_source.text
-            store_info = self.get_store_info(naver_map_source=naver_map_source)
+            try:
+                store_info = self.get_store_info(naver_map_source=naver_map_source)
+            except Exception as e:
+                print(
+                    f"error at shop {naver_url_key}. skip and conitnue ...error is {e}"
+                )
+                continue
 
             naver_map_results.append(
                 {
