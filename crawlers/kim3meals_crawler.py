@@ -1,10 +1,12 @@
 import argparse
 
+import pandas as pd
 import requests
+from tqdm import tqdm
 
 from crawlers.base_crawler import AbstractCrawler
+from crawlers.infinite_scroll_video_crawler import InfinitScrollVideoCrawler
 from crawlers.parsers.base_parser import NaverMapParser
-from crawlers.scrapers.base_scraper import MoreInfoScraper
 
 
 class Kim3MealsCrawler(AbstractCrawler):
@@ -25,6 +27,7 @@ class Kim3MealsCrawler(AbstractCrawler):
     def __init__(self, scraper: str, parser: str):
         self.scraper = scraper
         self.parser = parser
+        self.base_videos_url = "https://www.youtube.com/@{youtuber_tag}/videos"
 
     def crawl(self, target_youtuber_tag: str, **kwargs):
         """
@@ -81,7 +84,30 @@ class Kim3MealsCrawler(AbstractCrawler):
 
         """
         # infinite scroll video crawler를 이용해 모든 vids 들을 받는다.
-        self.scraper()
+        target_url = self.base_videos_url.format(youtuber_tag=target_youtuber_tag)
+        self.scraper(target_url=target_url, save_path=save_path)
+
+    def run(self, target_youtuber_tag: str, save_path: str):
+        # crawl total vids
+        part1_save_path = f"{save_path}/{target_youtuber_tag}_part1.csv"
+        # self.total_crawl(target_youtuber_tag, part1_save_path)
+
+        # load part1 df and get vids
+        part1_df = pd.read_csv(part1_save_path)
+        vids = part1_df["video_id"]
+
+        # parse each vids
+        part2_result = []
+        part2_save_path = f"{save_path}/{target_youtuber_tag}_part2.csv"
+        for vid in tqdm(vids, total=len(vids)):
+            vid_result = self.parser.parse(video_id=vid)
+            part2_result.extend(vid_result)
+
+        part2_df = pd.DataFrame(
+            part2_result,
+            columns=["video_id", "naver_url_key", "shop_name", "shop_location"],
+        )
+        part2_df.to_csv(part2_save_path, index=False, encoding="utf-8-sig")
 
 
 if __name__ == "__main__":
@@ -90,20 +116,8 @@ if __name__ == "__main__":
 
     args = argsparser.parse_args()
 
-    # recent crawl
-    # parser = NaverMapParser()
-    # scraper = MoreInfoScraper()
-    # crawler = Kim3MealsCrawler(scraper=scraper, parser=parser)
-    # result = crawler.crawl(args.target_youtuber_tag)
-    # print(f"total result: {result}")
-    # print(f"result[0]: {result[0]}")
-    # print(f"len of result is : {len(result)}")
-
     # total crawl
     parser = NaverMapParser()
-    scraper = MoreInfoScraper()
+    scraper = InfinitScrollVideoCrawler()
     crawler = Kim3MealsCrawler(scraper=scraper, parser=parser)
-    result = crawler.crawl(args.target_youtuber_tag)
-    print(f"total result: {result}")
-    print(f"result[0]: {result[0]}")
-    print(f"len of result is : {len(result)}")
+    crawler.run(target_youtuber_tag=args.target_youtuber_tag, save_path="./")

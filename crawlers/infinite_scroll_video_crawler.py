@@ -151,5 +151,6 @@ class InfinitScrollVideoCrawler:
 if __name__ == "__main__":
     crawler = InfinitScrollVideoCrawler()
     crawler(
-        target_url="https://www.youtube.com/@kim3meals/videos", save_path="./test.csv"
+        target_url="https://www.youtube.com/@kim3meals/videos",
+        save_path="./kim3meals_part1.csv",
     )
