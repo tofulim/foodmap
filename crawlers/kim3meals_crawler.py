@@ -105,7 +105,7 @@ class Kim3MealsCrawler(AbstractCrawler):
 
         part2_df = pd.DataFrame(
             part2_result,
-            columns=["video_id", "naver_url_key", "shop_name", "shop_location"],
+            columns=["video_id", "naver_url_key", "shop_name", "location"],
         )
         part2_df.to_csv(part2_save_path, index=False, encoding="utf-8-sig")
 
