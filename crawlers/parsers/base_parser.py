@@ -1,5 +1,5 @@
 import re
-from abc import ABC, abstractmethod
+from abc import ABC
 
 import requests
 from bs4 import BeautifulSoup
@@ -9,7 +9,6 @@ class AbstractParser(ABC):
     def __init__(self):
         pass
 
-    @abstractmethod
     def parse(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -51,83 +50,46 @@ class AbstractParser(ABC):
 
         return thumbnail
 
-
-class NaverMapParser(AbstractParser):
-    """
-    네이버 맵 url 내에 있는 가게 주소와 상호명을 가져온다.
-    (+ naver map id)
-    """
-
-    def __init__(self):
-        # 더보기란에서 정보를 얻겠다는 것
-        self.request_url = "https://www.youtube.com/watch?v={video_id}"
-        self.naver_url_shop_title_pattern = "data-line-title"
-        self.naver_url_shop_location_pattern = "data-line-description"
-
-    def parse(self, video_id: str, **kwargs):
+    @staticmethod
+    def get_youtuber_mark_image(youtuber_tag: str):
         """
-        개별 url의 영상을 분석해 thumbnail, store names, store address를 반환한다.
+        youtuber의 대표 이미지의 url을 추출한다.
+        해당 이미지를 지도의 마크로 사용하기 위함.
 
         Args:
-            video_id (str): youtube vid
-            **kwargs ():
+            youtuber_tag (str): 유튜버 태그 ex. kim3meals
 
         Returns:
-            naver_map_result (dict | List(dict)): 복수 혹은 단수의 가게 정보
+            mark_url (str): 썸네일 마크 이미지 url
 
         """
-
+        url = f"https://www.youtube.com/@{youtuber_tag}"
         response = requests.get(
-            url=self.request_url.format(video_id=video_id), verify=False
+            url,
+            headers={
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
+            },
         )
-        html_source = response.text
-        naver_url_keys = self.get_naver_url_keys(
-            total_page=html_source,
+        response.encoding = "utf-8"
+
+        pattern = (
+            '<link itemprop="url" href="'
+            + "(https://yt3.+?)"
+            + '"><meta itemprop="width" content="900">'
         )
+        mark_url = re.search(pattern, response.text).group(1)
 
-        naver_map_results = []
-        for naver_url_key in naver_url_keys:
-            url = f"https://naver.me/{naver_url_key}"
-            naver_map_source = requests.get(url, verify=False)
-            # ISO-8859-1 인코딩 문제로 한글 깨지는 문제 해결
-            naver_map_source.encoding = "utf-8"
-            naver_map_source = naver_map_source.text
-            try:
-                store_info = self.get_store_info(naver_map_source=naver_map_source)
-            except Exception as e:
-                print(
-                    f"error at shop {naver_url_key}. skip and conitnue ...error is {e}"
-                )
-                continue
-
-            naver_map_results.append(
-                {
-                    "video_id": video_id,
-                    "naver_url_key": naver_url_key,
-                    **store_info,
-                }
-            )
-
-        return naver_map_results
-
-    def get_store_info(self, naver_map_source: str):
-        pattern = '{target}="([^"]+)"'
-        name = re.search(
-            pattern.format(target=self.naver_url_shop_title_pattern), naver_map_source
-        ).group(1)
-        location = re.search(
-            pattern.format(target=self.naver_url_shop_location_pattern),
-            naver_map_source,
-        ).group(1)
-
-        return {
-            "shop_name": name,
-            "shop_location": location,
-        }
+        return mark_url
 
 
 if __name__ == "__main__":
-    nmp = NaverMapParser()
-    vid = "LvfBEJipU6o"
-    res = nmp.parse(video_id=vid)
-    print(res)
+    youtuber_tags = [
+        "kim3meals",
+        "jazziseverywhere",
+        "leeplay.official",
+    ]
+
+    abs_parser = AbstractParser()
+    for youtuber_tag in youtuber_tags:
+        mark_url = abs_parser.get_youtuber_mark_image(youtuber_tag)
+        print(mark_url)

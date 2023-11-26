@@ -30,3 +30,6 @@ MANIFEST
 */__pycache__/
 *.pyc
 __pycache__/
+
+# private data
+config/
