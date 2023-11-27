@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from crawlers.base_crawler import AbstractCrawler
 from crawlers.infinite_scroll_video_crawler import InfinitScrollVideoCrawler
-from crawlers.parsers.base_parser import NaverMapParser
+from crawlers.parsers.naver_parser import NaverMapParser
 
 
 class Kim3MealsCrawler(AbstractCrawler):
@@ -105,7 +105,7 @@ class Kim3MealsCrawler(AbstractCrawler):
 
         part2_df = pd.DataFrame(
             part2_result,
-            columns=["video_id", "naver_url_key", "shop_name", "location"],
+            columns=["video_id", "naver_url_key", "shop_name", "shop_location"],
         )
         part2_df.to_csv(part2_save_path, index=False, encoding="utf-8-sig")
 
