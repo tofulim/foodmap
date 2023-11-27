@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 class VideoInfo(BaseModel):
     tag: str
-    location: str
-    id: str
+    shop_location: str
+    video_id: str
     title: str
-    thumbnail: str
+    thumbnail: str = "null"
