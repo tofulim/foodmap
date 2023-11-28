@@ -72,6 +72,8 @@ class NaverMapParser(AbstractParser):
             pattern.format(target=self.naver_url_shop_location_pattern),
             naver_map_source,
         ).group(1)
+        if location.endswith("."):
+            location = location[:-1]
 
         return {
             "shop_name": name,

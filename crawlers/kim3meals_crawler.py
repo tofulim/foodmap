@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from crawlers.base_crawler import AbstractCrawler
 from crawlers.infinite_scroll_video_crawler import InfinitScrollVideoCrawler
-from crawlers.parsers.base_parser import NaverMapParser
+from crawlers.parsers.naver_parser import NaverMapParser
 
 
 class Kim3MealsCrawler(AbstractCrawler):

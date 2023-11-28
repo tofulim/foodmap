@@ -126,6 +126,17 @@ class InfinitScrollVideoCrawler:
             # 제목 추출
             title = video_html.find("a", {"id": "video-title-link"})["title"]
 
+            # 썸네일 추출
+            try:
+                thumbnail = video_html.find(
+                    "img",
+                    {
+                        "class": "yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded"
+                    },
+                )["src"]
+            except Exception:
+                thumbnail = ""
+
             # youtube 영상의 메타 데이터 (조회 수, 업로드 시점) 추출
             meta_datas = video_html.find(
                 "div", {"class": "style-scope ytd-video-meta-block"}
@@ -136,13 +147,15 @@ class InfinitScrollVideoCrawler:
                 {
                     "video_id": video_id,
                     "title": title,
+                    "thumbnail": thumbnail,
                     "num_click": num_click,
                     "uploaded_time": uploaded_time,
                 }
             )
 
         base_videos_info_df = pd.DataFrame(
-            video_info, columns=["video_id", "title", "num_click", "uploaded_time"]
+            video_info,
+            columns=["video_id", "title", "num_click", "uploaded_time", "thumbnail"],
         )
         base_videos_info_df.to_csv(save_path, index=False, encoding="utf-8-sig")
         logger.info(f"file saved at {save_path}")
