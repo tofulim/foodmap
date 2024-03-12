@@ -33,3 +33,5 @@ __pycache__/
 
 # private data
 config/
+
+# env
